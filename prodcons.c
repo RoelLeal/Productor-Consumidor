@@ -15,8 +15,12 @@ struct productor {
 int produccionTotal = 100;
 int vectorProduccion[10];
 
+int random() {
+	srand(time(NULL));
+	return 1 + rand() % 10;
+}
+
 int main() {
-	
 	
 	int producido = 0;
 	
@@ -26,22 +30,27 @@ int main() {
 	productor.estado = true;
 	consumidor.estado = false;
 	
-	#pragma omp parallel sections 
+	#pragma omp parallel num_threads(1)
 	{
-		#pragma omp section //PRODUCTOR
-		{
-			if(produccionTotal <= 100 && 
-			consumidor.estado == false) {
-				producido = 1 + rand() * 10;
-				printf("%i", producido);
-			}
-		}
-		#pragma omp section //CONSUMIDOR
-		{
-			if(produccionTotal <= 100 && 
-			productor.estado == false) {
-				
-			}
+		if(produccionTotal <= 100 && 
+		  consumidor.estado == false) {
+			printf("%i \n", random());
+			printf("Hola");
+			productor.estado = false;
 		}
 	}
+	#pragma omp parallel num_threads(1)
+	{
+		if(produccionTotal <= 100 &&
+			productor.estado == false) {
+			printf("%i \n", random());
+			printf("Adios");
+			consumidor.estado = false;
+		}
+	}
+	if(produccionTotal < 100)
+		return 0;
+	main();
+	
+	return 0;
 }
