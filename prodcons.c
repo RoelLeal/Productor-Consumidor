@@ -18,6 +18,7 @@ int produccionTotal = 0;
 int vectorProduccion[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 int random(int rango) {
+	srand(time(NULL));
     return 1 + rand() % rango;
 }
 
@@ -50,7 +51,7 @@ int main() {
                             	printf("\n");
 						}
 						printf("\n\n");
-                        sleep(2);
+                        sleep(random(2));
                     }
 //                    for (i = 0; i < 10; i++) {
 //                        printf("%i", vectorProduccion[i]);
@@ -67,7 +68,7 @@ int main() {
                 if (produccionTotal < 100 && 
 					productor.estado == false && vectorVacio == false) {
                 	printf("\nConsumidor: \n");
-                    for (i = 0; i < tanda; i++) {
+                    for (i = 0; i < tanda+1; i++) {// +1 PARA MOSTRAR ARREGLO VACIO
                         for(j = 0; j < 10; j++) {
                         	printf("%i", vectorProduccion[j]);
                         	if (j == 4)
@@ -76,7 +77,7 @@ int main() {
 						printf("\n\n");
 						if(vectorProduccion[i] == 1)
                             vectorProduccion[i] = 0;
-						sleep(2);
+						sleep(random(2));
                     }
                     vectorVacio = true;
                     consumidor.estado = false;
