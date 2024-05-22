@@ -27,6 +27,10 @@ struct productor {
 
 int producido = 0, consumido = 0;
 int vectorProduccion[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+int matrizConsumidor[10][5] = 
+{{0, 0, 0, 0, 0}, {0, 0, 0, 0, 0},
+{0, 0, 0, 0, 0}, {0, 0, 0, 0, 0},
+{0, 0, 0, 0, 0}};
 
 struct consumidor consumidor;
 struct productor productor;
@@ -60,6 +64,10 @@ void imprimirPantalla() {
     } else {
         printf("Estado: Durmiendo");
     }
+    gotoxy(53, 9);
+    printf("Cajita\n");
+    gotoxy(80, 9);
+    printf("Cajita de consumidor\n");
 }
 
 bool estaLleno() {
@@ -82,25 +90,35 @@ int contarUnos() {
     return cont;
 }
 
+int mostrarCajaConsumo(int matriz[]) {
+	int j = 0, k = 0;
+    for (j = 0; j < 10; j++) {
+    	for (k = 0; k < 5; k++) {
+    		gotoxy(80 + j, 11 + k);
+    		printf("%i", matrizConsumidor[j][k]);
+		}
+    }
+}
+
 int main() {
-	
+	system("color 1F");
 	srand(time(NULL));
 
-    int i = 0, tanda = 0, j = 0, pos = 0;
-    bool vectorVacio = true;
+    int i = 0, tanda = 0, j = 0, k = 0, pos = 0, posJ = 0, posK = 0;
+    bool vectorVacio = true, hayEspacio = false;
 
     productor.estado = true;
     consumidor.estado = false;
 
-    while (producido < 100) {
+    while (producido <= 50 && consumido <= 50) {
         #pragma omp parallel sections
         {
             #pragma omp section
             {
-                if (producido < 100 && consumidor.estado == false && vectorVacio == true) {
+                if (producido <= 50 && consumidor.estado == false && vectorVacio == true) {
                     tanda = randomsc(10);
                     i = 0;
-                    while (i < tanda) {
+                    while (i < tanda && producido < 50) {
                         pos = randomcc(10);
                         if (vectorProduccion[pos] == 0) {
                             vectorProduccion[pos] = 1;
@@ -111,7 +129,8 @@ int main() {
                                 gotoxy(51 + j, 10);
                                 printf("%i", vectorProduccion[j]);
                             }
-                            sleep(randomsc(2));
+                            mostrarCajaConsumo(matrizConsumidor);
+                            sleep(1);
                             i++;
                         } else if (estaLleno()) {
                             break;
@@ -120,19 +139,29 @@ int main() {
                     tanda = 0;
                     vectorVacio = false;
                     productor.estado = false;
-                    consumidor.estado = true; // Cambiar estado del consumidor
+                    consumidor.estado = true;
                 }
             }
             // Consumidor
             #pragma omp section
             {
-                if (producido < 100 && productor.estado == false && vectorVacio == false) {
+                if (producido <= 50 && productor.estado == false && vectorVacio == false) {
                     tanda = randomsc(contarUnos());
                     i = 0;
-                    while (i < tanda) {
+                    while (i < tanda && consumido < 50) {
                         pos = randomcc(10);
                         if (vectorProduccion[pos] == 1) {
                             vectorProduccion[pos] = 0;
+                            pos = randomcc(50);
+                            while(hayEspacio == false) {
+	                            posJ = randomcc(10);
+	                            posK = randomcc(5);
+	                            if(matrizConsumidor[posJ][posK] == 0) {
+	                            	matrizConsumidor[posJ][posK] = 1;
+	                            	hayEspacio = true;
+								}
+							}
+							hayEspacio = false;
                             consumido++;
                             system("cls");
                             imprimirPantalla();
@@ -140,19 +169,19 @@ int main() {
                                 gotoxy(51 + j, 10);
                                 printf("%i", vectorProduccion[j]);
                             }
-                            sleep(randomsc(2));
+                            mostrarCajaConsumo(matrizConsumidor);
+                            sleep(1);
                             i++;
                         }
                     }
                     tanda = 0;
                     vectorVacio = true;
-                    productor.estado = true; // Cambiar estado del productor
+                    productor.estado = true;
                     consumidor.estado = false;
                 }
             }
         }
-        sleep(2);
+        sleep(1);
     }
     return 0;
 }
-
